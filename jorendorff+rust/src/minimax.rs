@@ -62,29 +62,29 @@ fn score_game<G: Game>(game: &G) -> f64 {
 pub fn best_move_with_depth_limit<F, G>(estimator: &F, move_limit: i32, g: &G) -> G::Move where
     F: Fn(&G) -> f64, G: Game
 {
-    let half_move_limit = move_limit * 2 - 1;
+    let halfmove_limit = move_limit * 2 - 1;
     let moves = g.moves();
-    *max_by(moves.iter(), |m| score_move_with_depth_limit(estimator, half_move_limit, g, **m))
+    *max_by(moves.iter(), |m| score_move_with_depth_limit(estimator, halfmove_limit, g, **m))
 }
 
-fn score_move_with_depth_limit<F, G>(estimator: &F, move_limit: i32, g: &G, m: G::Move) -> f64 where
+fn score_move_with_depth_limit<F, G>(estimator: &F, halfmove_limit: i32, g: &G, m: G::Move) -> f64 where
     F: Fn(&G) -> f64, G: Game
 {
     let g1 = g.apply_move(m);
-    score_game_with_depth_limit(estimator, move_limit, &g1)
+    score_game_with_depth_limit(estimator, halfmove_limit, &g1)
 }
 
-fn score_game_with_depth_limit<F, G>(estimator: &F, move_limit: i32, g: &G) -> f64 where
+fn score_game_with_depth_limit<F, G>(estimator: &F, halfmove_limit: i32, g: &G) -> f64 where
     F: Fn(&G) -> f64, G: Game
 {
     let moves = g.moves();
     if moves.len() == 0 {
         g.score_finished_game()
-    } else if move_limit == 0 {
+    } else if halfmove_limit == 0 {
         estimator(g)
     } else {
         -0.999 * max(moves.iter().map(|m| {
-            score_move_with_depth_limit(estimator, move_limit - 1, g, *m)
+            score_move_with_depth_limit(estimator, halfmove_limit - 1, g, *m)
         }))
     }
 }
