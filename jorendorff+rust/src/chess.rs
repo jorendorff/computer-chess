@@ -292,6 +292,7 @@ impl Debug for ChessMove {
     }
 }
 
+/*
 pub fn chars_to_col_row(chars: &[char]) -> (u8, u8) {
     let mut iter = chars.iter();
     let &c = iter.next().expect("chars_to_col_row: empty input");
@@ -305,6 +306,7 @@ pub fn chars_to_col_row(chars: &[char]) -> (u8, u8) {
     assert!(ur < 8);
     (uc as u8, ur as u8)
 }
+*/
 
 pub fn chars_to_bit(c: char, r: char) -> Option<u64> {
     let uc = c as u32 - COL_LETTERS[0] as u32;
