@@ -1,5 +1,8 @@
 // *** minimax.rs: Generic minimax implementation *****************************
 
+use std;
+use std::thread;
+
 
 // === What is a game?
 
@@ -87,4 +90,39 @@ fn score_game_with_depth_limit<F, G>(estimator: &F, halfmove_limit: i32, g: &G) 
             score_move_with_depth_limit(estimator, halfmove_limit - 1, g, *m)
         }))
     }
+}
+
+
+// === ...and you have threads available
+
+pub fn best_move_with_depth_limit_threaded<F, G>(estimator: &F, move_limit: i32, g: &G)
+        -> std::thread::Result<G::Move> where
+    F: 'static + Copy + Send + Fn(&G) -> f64,
+    G: 'static + Game + Send,
+    G::Move: 'static + Send
+{
+    let halfmove_limit = move_limit * 2 - 1;
+    let moves: Vec<_> = g.moves();
+    let mut threads: Vec<std::thread::JoinHandle<(G::Move, f64)>> = vec![];
+
+    for m in moves {
+        let child_estimator: F = *estimator;
+        let game: G = g.clone();
+        let handle = thread::spawn(move || {
+            (m, score_move_with_depth_limit(&child_estimator, halfmove_limit, &game, m))
+        });
+        threads.push(handle);
+    }
+
+    let mut best_move = None;
+    let mut best_score = std::f64::NEG_INFINITY;
+    for t in threads {
+        let (m, score) = try!(t.join());
+        if score > best_score {
+            best_move = Some(m);
+            best_score = score;
+        }
+    }
+
+    Ok(best_move.expect("there should have been at least one move"))
 }

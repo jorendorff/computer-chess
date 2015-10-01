@@ -7,7 +7,7 @@ use std::ops::Range;
 use std::str::FromStr;
 
 use minimax::Game;
-use minimax::best_move_with_depth_limit;
+use minimax::best_move_with_depth_limit_threaded;
 
 
 // *** Game state structs *****************************************************
@@ -1162,5 +1162,5 @@ chessAI = bestMoveWithPresortAndDepthLimit presortMoves heuristic 2
 */
 
 pub fn ai(board: &Chessboard) -> ChessMove {
-    best_move_with_depth_limit(&heuristic, 2, board)
+    best_move_with_depth_limit_threaded(&heuristic, 2, board).ok().expect("an error happened")
 }
